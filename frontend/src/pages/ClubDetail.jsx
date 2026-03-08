@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Users, Calendar, Mail, Facebook, Heart, CheckCircle, ChevronRight, Activity, Building2 } from 'lucide-react';
+import { Users, Calendar, Mail, Facebook, Heart, CheckCircle, ChevronRight, Activity, Building2, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import api from '../utils/api';
@@ -26,13 +26,19 @@ export default function ClubDetail() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('Giới thiệu');
   const [saved, setSaved] = useState(false);
+  const [images, setImages] = useState([]);
+  const [lightbox, setLightbox] = useState(null); // index of open image
   const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', major: user?.major || '', year: user?.year || '', reason: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    api.get(`/clubs/${slug}`).then((r) => { setClub(r.data); setLoading(false); }).catch(() => setLoading(false));
+    api.get(`/clubs/${slug}`).then((r) => {
+      setClub(r.data);
+      setLoading(false);
+      api.get(`/clubs/${r.data.id}/images`).then((ir) => setImages(ir.data)).catch(() => {});
+    }).catch(() => setLoading(false));
   }, [slug]);
 
   const toggleSave = async () => {
@@ -79,9 +85,13 @@ export default function ClubDetail() {
   return (
     <div className="pt-16">
       {/* Banner */}
-      <div className={`h-56 md:h-72 bg-gradient-to-br ${cat.color} relative overflow-hidden`}>
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+      <div className={`h-56 md:h-72 relative overflow-hidden ${images.length === 0 ? `bg-gradient-to-br ${cat.color}` : ''}`}>
+        {images.length > 0 ? (
+          <img src={images[0].url} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -155,6 +165,24 @@ export default function ClubDetail() {
                       Các hoạt động
                     </h2>
                     <p className="text-slate-600 leading-relaxed whitespace-pre-line">{club.activities}</p>
+                  </div>
+                )}
+
+                {/* Photo gallery */}
+                {images.length > 0 && (
+                  <div className="card p-6">
+                    <h2 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+                      <span className="w-1 h-5 bg-indigo-500 rounded-full inline-block" />
+                      Hình ảnh CLB
+                    </h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {images.map((img, i) => (
+                        <button key={img.id} onClick={() => setLightbox(i)}
+                          className="aspect-square rounded-xl overflow-hidden hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                          <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -308,6 +336,26 @@ export default function ClubDetail() {
           )}
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightbox !== null && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
+          <button className="absolute top-4 right-4 text-white/70 hover:text-white p-2" onClick={() => setLightbox(null)}>
+            <X size={28} />
+          </button>
+          {lightbox > 0 && (
+            <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-2 text-3xl"
+              onClick={(e) => { e.stopPropagation(); setLightbox(lightbox - 1); }}>‹</button>
+          )}
+          <img src={images[lightbox]?.url} alt="" className="max-w-full max-h-[85vh] rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()} />
+          {lightbox < images.length - 1 && (
+            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-2 text-3xl"
+              onClick={(e) => { e.stopPropagation(); setLightbox(lightbox + 1); }}>›</button>
+          )}
+          <p className="absolute bottom-4 text-white/50 text-sm">{lightbox + 1} / {images.length}</p>
+        </div>
+      )}
     </div>
   );
 }
