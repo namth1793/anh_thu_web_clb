@@ -54,7 +54,7 @@ router.get('/', (req, res) => {
 // Get club by slug
 router.get('/:slug', (req, res) => {
   const club = db.prepare(`
-    SELECT c.*, u.name as leader_name, u.avatar as leader_avatar, u.major as leader_major, u.bio as leader_bio, u.email as leader_email
+    SELECT c.*, COALESCE(c.leader_name, u.name) as leader_name, u.avatar as leader_avatar, u.major as leader_major, u.bio as leader_bio, u.email as leader_email
     FROM clubs c
     LEFT JOIN users u ON c.leader_id = u.id
     WHERE c.slug = ?
@@ -98,22 +98,22 @@ router.post('/:id/save', auth, (req, res) => {
 
 // Create club (admin)
 router.post('/', auth, adminOnly, (req, res) => {
-  const { name, slug, category, short_desc, description, founded_year, leader_id, contact_email, contact_fb, leader_fb, activities, departments } = req.body;
+  const { name, slug, category, short_desc, description, founded_year, leader_id, leader_name, contact_email, contact_fb, leader_fb, activities, departments } = req.body;
   const result = db.prepare(`
-    INSERT INTO clubs (name, slug, category, short_desc, description, founded_year, leader_id, contact_email, contact_fb, leader_fb, activities, departments)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(name, slug, category, short_desc, description, founded_year, leader_id || null, contact_email, contact_fb, leader_fb || null, activities || null, departments || null);
+    INSERT INTO clubs (name, slug, category, short_desc, description, founded_year, leader_id, leader_name, contact_email, contact_fb, leader_fb, activities, departments)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(name, slug, category, short_desc, description, founded_year, leader_id || null, leader_name || null, contact_email, contact_fb, leader_fb || null, activities || null, departments || null);
   const club = db.prepare('SELECT * FROM clubs WHERE id = ?').get(result.lastInsertRowid);
   res.status(201).json(club);
 });
 
 // Update club (admin or leader of that club)
 router.put('/:id', auth, leaderOrAdmin, (req, res) => {
-  const { name, category, short_desc, description, founded_year, contact_email, contact_fb, leader_fb, activities, departments, is_featured } = req.body;
+  const { name, category, short_desc, description, founded_year, leader_name, contact_email, contact_fb, leader_fb, activities, departments, is_featured } = req.body;
   db.prepare(`
     UPDATE clubs SET name=?, category=?, short_desc=?, description=?, founded_year=?,
-    contact_email=?, contact_fb=?, leader_fb=?, activities=?, departments=?, is_featured=? WHERE id=?
-  `).run(name, category, short_desc, description, founded_year, contact_email, contact_fb, leader_fb || null, activities || null, departments || null, is_featured || 0, req.params.id);
+    leader_name=?, contact_email=?, contact_fb=?, leader_fb=?, activities=?, departments=?, is_featured=? WHERE id=?
+  `).run(name, category, short_desc, description, founded_year, leader_name || null, contact_email, contact_fb, leader_fb || null, activities || null, departments || null, is_featured || 0, req.params.id);
   const club = db.prepare('SELECT * FROM clubs WHERE id = ?').get(req.params.id);
   res.json(club);
 });

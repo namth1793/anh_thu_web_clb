@@ -1,27 +1,49 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Save } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, PlusCircle, MinusCircle } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
-const CATEGORIES = ['technology', 'academic', 'media', 'art', 'sports', 'community'];
-const emptyForm = { name: '', slug: '', category: 'technology', short_desc: '', description: '', founded_year: new Date().getFullYear(), contact_email: '', contact_fb: '', is_featured: 0 };
+
+const emptyForm = {
+  name: '', slug: '', category: 'technology', short_desc: '',
+  description: '', contact_fb: '', leader_name: '', leader_fb: '',
+  activities: '', founded_year: new Date().getFullYear(),
+  contact_email: '', is_featured: 0,
+};
+const emptyDept = { name: '', desc: '' };
+
+function toSlug(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd').replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+}
 
 export default function AdminClubs() {
   const [clubs, setClubs] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [depts, setDepts] = useState([{ ...emptyDept }]);
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const fetchClubs = () => api.get('/admin/clubs').then((r) => setClubs(r.data)).catch(() => {});
-
   useEffect(() => { fetchClubs(); }, []);
 
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const set = (k) => (e) => {
+    const val = e.target.value;
+    setForm((prev) => ({ ...prev, [k]: val, ...(k === 'name' && !editId ? { slug: toSlug(val) } : {}) }));
+  };
 
-  const openCreate = () => { setForm(emptyForm); setEditId(null); setShowForm(true); };
+  const openCreate = () => { setForm(emptyForm); setDepts([{ ...emptyDept }]); setEditId(null); setShowForm(true); };
   const openEdit = (c) => {
-    setForm({ name: c.name, slug: c.slug, category: c.category, short_desc: c.short_desc || '', description: c.description || '', founded_year: c.founded_year || '', contact_email: c.contact_email || '', contact_fb: c.contact_fb || '', is_featured: c.is_featured });
+    setForm({
+      name: c.name, slug: c.slug, category: c.category, short_desc: c.short_desc || '',
+      description: c.description || '', contact_fb: c.contact_fb || '', leader_name: c.leader_name || '', leader_fb: c.leader_fb || '',
+      activities: c.activities || '', founded_year: c.founded_year || '',
+      contact_email: c.contact_email || '', is_featured: c.is_featured,
+    });
+    let parsed = [{ ...emptyDept }];
+    try { if (c.departments) parsed = JSON.parse(c.departments); } catch {}
+    setDepts(parsed.length ? parsed : [{ ...emptyDept }]);
     setEditId(c.id);
     setShowForm(true);
   };
@@ -29,20 +51,20 @@ export default function AdminClubs() {
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
+    const payload = { ...form, departments: JSON.stringify(depts.filter((d) => d.name.trim())) };
     try {
-      if (editId) {
-        await api.put(`/clubs/${editId}`, form);
-        toast.success('Đã cập nhật CLB');
-      } else {
-        await api.post('/clubs', form);
-        toast.success('Đã tạo CLB mới');
-      }
+      if (editId) { await api.put(`/clubs/${editId}`, payload); toast.success('Đã cập nhật CLB'); }
+      else { await api.post('/clubs', payload); toast.success('Đã tạo CLB mới'); }
       setShowForm(false);
       fetchClubs();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Lỗi!');
     } finally { setSaving(false); }
   };
+
+  const updateDept = (i, k, v) => setDepts((prev) => prev.map((d, idx) => idx === i ? { ...d, [k]: v } : d));
+  const addDept = () => setDepts((prev) => [...prev, { ...emptyDept }]);
+  const removeDept = (i) => setDepts((prev) => prev.filter((_, idx) => idx !== i));
 
   const remove = async (id, name) => {
     if (!window.confirm(`Xóa CLB "${name}"? Hành động này không thể hoàn tác!`)) return;
@@ -107,53 +129,86 @@ export default function AdminClubs() {
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="font-bold text-slate-800">{editId ? 'Chỉnh sửa CLB' : 'Thêm CLB mới'}</h2>
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white rounded-t-3xl z-10">
+              <h2 className="font-bold text-slate-800 text-lg">{editId ? 'Chỉnh sửa CLB' : 'Thêm CLB mới'}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-xl"><X size={18} /></button>
             </div>
-            <form onSubmit={save} className="p-6 space-y-4">
+            <form onSubmit={save} className="p-6 space-y-6">
+
+              {/* Tên CLB */}
               <div>
                 <label className="text-sm font-medium text-slate-700 block mb-1">Tên CLB *</label>
                 <input value={form.name} onChange={set('name')} className="input" required />
               </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Slug (URL) *</label>
-                <input value={form.slug} onChange={set('slug')} className="input" placeholder="fpt-code-club" required />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Danh mục</label>
-                <select value={form.category} onChange={set('category')} className="input">
-                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Mô tả ngắn</label>
-                <input value={form.short_desc} onChange={set('short_desc')} className="input" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Mô tả đầy đủ</label>
-                <textarea value={form.description} onChange={set('description')} className="input min-h-24 resize-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+
+              {/* Leader */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Leader</p>
                 <div>
-                  <label className="text-sm font-medium text-slate-700 block mb-1">Năm thành lập</label>
-                  <input type="number" value={form.founded_year} onChange={set('founded_year')} className="input" />
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Tên Leader</label>
+                  <input value={form.leader_name} onChange={set('leader_name')} className="input" placeholder="Nguyễn Văn A" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700 block mb-1">Nổi bật</label>
-                  <select value={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: Number(e.target.value) })} className="input">
-                    <option value={0}>Không</option>
-                    <option value={1}>Có</option>
-                  </select>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Link Facebook của Leader</label>
+                  <input value={form.leader_fb} onChange={set('leader_fb')} className="input" placeholder="https://www.facebook.com/..." />
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Email liên hệ</label>
-                <input type="email" value={form.contact_email} onChange={set('contact_email')} className="input" />
+
+              {/* Thông tin CLB */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Thông tin CLB</p>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Fanpage Facebook của CLB</label>
+                  <input value={form.contact_fb} onChange={set('contact_fb')} className="input" placeholder="https://www.facebook.com/..." />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Email liên hệ</label>
+                  <input type="email" value={form.contact_email} onChange={set('contact_email')} className="input" placeholder="clb@gmail.com" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Giới thiệu CLB</label>
+                  <textarea value={form.description} onChange={set('description')} className="input min-h-28 resize-none" placeholder="Mô tả đầy đủ về CLB..." />
+                </div>
               </div>
+
+              {/* Hoạt động */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Các hoạt động</p>
+                <textarea value={form.activities} onChange={set('activities')} className="input min-h-28 resize-none"
+                  placeholder="Mô tả các hoạt động chính (xuống dòng để tách từng hoạt động)..." />
+              </div>
+
+              {/* Các ban */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Các ban</p>
+                  <button type="button" onClick={addDept} className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                    <PlusCircle size={15} /> Thêm ban
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {depts.map((d, i) => (
+                    <div key={i} className="bg-slate-50 rounded-2xl p-4 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                        <input value={d.name} onChange={(e) => updateDept(i, 'name', e.target.value)}
+                          className="input text-sm py-1.5" placeholder="Tên ban (VD: Ban Truyền thông)" />
+                        {depts.length > 1 && (
+                          <button type="button" onClick={() => removeDept(i)} className="text-red-400 hover:text-red-600 shrink-0">
+                            <MinusCircle size={16} />
+                          </button>
+                        )}
+                      </div>
+                      <textarea value={d.desc} onChange={(e) => updateDept(i, 'desc', e.target.value)}
+                        className="input text-sm py-1.5 min-h-16 resize-none" placeholder="Mô tả nhiệm vụ của ban..." />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <button type="submit" disabled={saving} className="btn-primary w-full justify-center">
-                <Save size={16} /> {saving ? 'Đang lưu...' : 'Lưu'}
+                <Save size={16} /> {saving ? 'Đang lưu...' : 'Lưu thông tin'}
               </button>
             </form>
           </div>
