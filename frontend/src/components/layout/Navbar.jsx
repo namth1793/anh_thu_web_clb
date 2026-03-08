@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { Bell, ChevronDown, LayoutDashboard, LogOut, Menu, User, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Bell, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import api from '../../utils/api';
@@ -51,7 +51,6 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 font-bold text-xl group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-black shadow-md group-hover:shadow-indigo-200 group-hover:scale-105 transition-all duration-200">C</div>
             <span className="gradient-text text-xl">Clubhub</span>
           </Link>
 

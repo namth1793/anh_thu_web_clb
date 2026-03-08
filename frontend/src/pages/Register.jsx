@@ -1,6 +1,6 @@
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
@@ -20,7 +20,6 @@ export default function Register() {
     <div className="pt-16 min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-violet-50 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-2xl mx-auto mb-4">F</div>
           <h1 className="text-2xl font-black text-slate-800">Tạo tài khoản</h1>
           <p className="text-slate-500 text-sm mt-1">Tham gia cộng đồng Clubhub ngay hôm nay</p>
         </div>

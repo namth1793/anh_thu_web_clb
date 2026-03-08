@@ -1,9 +1,14 @@
-import { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Users, Trophy, Calendar, FileText, MessageSquare,
-  Newspaper, LogOut, Menu, X, ChevronRight
+  Calendar, FileText,
+  LayoutDashboard,
+  LogOut, Menu,
+  MessageSquare,
+  Newspaper,
+  Trophy,
+  Users
 } from 'lucide-react';
+import { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
@@ -28,7 +33,6 @@ export default function AdminLayout() {
       {/* Brand */}
       <div className="px-6 py-5 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black">F</div>
           <div>
             <p className="text-white font-bold text-sm">Clubhub</p>
             <p className="text-slate-400 text-xs">Admin Panel</p>
