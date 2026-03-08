@@ -1,5 +1,5 @@
+import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MapPin, Mail, Phone, Facebook, Youtube, Instagram } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -8,7 +8,6 @@ export default function Footer() {
         {/* Brand */}
         <div className="md:col-span-1">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-base">F</div>
             <span className="font-bold text-lg text-white">Clubhub</span>
           </div>
           <p className="text-sm leading-relaxed text-slate-400">

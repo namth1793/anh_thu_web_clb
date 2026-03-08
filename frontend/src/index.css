@@ -151,12 +151,12 @@
 
 /* Gradient hero bg */
 .bg-hero {
-  background: linear-gradient(135deg,#1e1b4b 0%,#312e81 35%,#4c1d95 65%,#581c87 100%);
+  background: linear-gradient(135deg,#7c2d00 0%,#9c3a08 35%,#b34c12 65%,#d45c16 100%);
 }
 
 /* Animated gradient text */
 .gradient-text-animated {
-  background: linear-gradient(90deg,#a78bfa,#818cf8,#60a5fa,#34d399,#a78bfa);
+  background: linear-gradient(90deg,#F37021,#f68c49,#f9a872,#F37021,#d45c16,#F37021);
   background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -166,7 +166,7 @@
 
 /* Card glow on hover */
 .card-glow:hover {
-  box-shadow: 0 0 0 2px rgba(99,102,241,0.2), 0 20px 40px rgba(99,102,241,0.1);
+  box-shadow: 0 0 0 2px rgba(243,112,33,0.2), 0 20px 40px rgba(243,112,33,0.1);
 }
 
 /* Floating orbs */
