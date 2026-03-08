@@ -137,6 +137,14 @@ db.exec(`
     saved_at TEXT DEFAULT (datetime('now','localtime')),
     UNIQUE(user_id, club_id)
   );
+
+  CREATE TABLE IF NOT EXISTS club_images (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    club_id     INTEGER NOT NULL REFERENCES clubs(id) ON DELETE CASCADE,
+    url         TEXT NOT NULL,
+    public_id   TEXT NOT NULL,
+    uploaded_at TEXT DEFAULT (datetime('now','localtime'))
+  );
 `);
 
 // ── Migrate: add new columns if not exist ──────────────────────────────────

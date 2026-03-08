@@ -72,7 +72,10 @@ export default function ChatWidget() {
       {/* Floating button */}
       <button
         onClick={() => (open ? setOpen(false) : handleOpen())}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 text-white rounded-2xl shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+        style={{ backgroundColor: '#FBBF24' }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F59E0B')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FBBF24')}
       >
         {open ? <X size={22} /> : <MessageCircle size={22} />}
         {!open && <span className="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />}

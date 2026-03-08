@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Save, PlusCircle, MinusCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, Trash2, X, Save, PlusCircle, MinusCircle, Upload, ImageIcon } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-
 
 const emptyForm = {
   name: '', slug: '', category: 'technology', short_desc: '',
@@ -25,19 +24,38 @@ export default function AdminClubs() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  // Image states
+  const [clubImages, setClubImages] = useState([]);  // {id, url, public_id} from server
+  const [newFiles, setNewFiles] = useState([]);       // File[] pending upload
+  const [previews, setPreviews] = useState([]);       // blob URLs for preview
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
   const fetchClubs = () => api.get('/admin/clubs').then((r) => setClubs(r.data)).catch(() => {});
   useEffect(() => { fetchClubs(); }, []);
+
+  // Cleanup blob preview URLs
+  useEffect(() => () => previews.forEach(URL.revokeObjectURL), [previews]);
+
+  const fetchImages = (id) =>
+    api.get(`/clubs/${id}/images`).then((r) => setClubImages(r.data)).catch(() => setClubImages([]));
 
   const set = (k) => (e) => {
     const val = e.target.value;
     setForm((prev) => ({ ...prev, [k]: val, ...(k === 'name' && !editId ? { slug: toSlug(val) } : {}) }));
   };
 
-  const openCreate = () => { setForm(emptyForm); setDepts([{ ...emptyDept }]); setEditId(null); setShowForm(true); };
+  const openCreate = () => {
+    setForm(emptyForm); setDepts([{ ...emptyDept }]); setEditId(null);
+    setClubImages([]); setNewFiles([]); setPreviews([]);
+    setShowForm(true);
+  };
+
   const openEdit = (c) => {
     setForm({
       name: c.name, slug: c.slug, category: c.category, short_desc: c.short_desc || '',
-      description: c.description || '', contact_fb: c.contact_fb || '', leader_name: c.leader_name || '', leader_fb: c.leader_fb || '',
+      description: c.description || '', contact_fb: c.contact_fb || '',
+      leader_name: c.leader_name || '', leader_fb: c.leader_fb || '',
       activities: c.activities || '', founded_year: c.founded_year || '',
       contact_email: c.contact_email || '', is_featured: c.is_featured,
     });
@@ -45,6 +63,8 @@ export default function AdminClubs() {
     try { if (c.departments) parsed = JSON.parse(c.departments); } catch {}
     setDepts(parsed.length ? parsed : [{ ...emptyDept }]);
     setEditId(c.id);
+    setNewFiles([]); setPreviews([]);
+    fetchImages(c.id);
     setShowForm(true);
   };
 
@@ -53,13 +73,63 @@ export default function AdminClubs() {
     setSaving(true);
     const payload = { ...form, departments: JSON.stringify(depts.filter((d) => d.name.trim())) };
     try {
-      if (editId) { await api.put(`/clubs/${editId}`, payload); toast.success('Đã cập nhật CLB'); }
-      else { await api.post('/clubs', payload); toast.success('Đã tạo CLB mới'); }
+      let savedId = editId;
+      if (editId) {
+        await api.put(`/clubs/${editId}`, payload);
+        toast.success('Đã cập nhật CLB');
+      } else {
+        const r = await api.post('/clubs', payload);
+        savedId = r.data.id;
+        toast.success('Đã tạo CLB mới');
+      }
+      if (newFiles.length > 0 && savedId) {
+        await doUpload(savedId);
+      }
       setShowForm(false);
       fetchClubs();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Lỗi!');
     } finally { setSaving(false); }
+  };
+
+  const doUpload = async (id) => {
+    setUploading(true);
+    const fd = new FormData();
+    newFiles.forEach((f) => fd.append('images', f));
+    try {
+      const r = await api.post(`/clubs/${id}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setNewFiles([]); setPreviews([]);
+      setClubImages((prev) => [...r.data, ...prev]);
+      toast.success(`Đã upload ${r.data.length} ảnh`);
+    } catch {
+      toast.error('Upload ảnh thất bại');
+    } finally { setUploading(false); }
+  };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    if (clubImages.length + newFiles.length + files.length > 10) {
+      toast.error('Tối đa 10 ảnh mỗi CLB');
+      return;
+    }
+    setNewFiles((prev) => [...prev, ...files]);
+    setPreviews((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
+    e.target.value = '';
+  };
+
+  const removeNewFile = (i) => {
+    URL.revokeObjectURL(previews[i]);
+    setNewFiles((prev) => prev.filter((_, idx) => idx !== i));
+    setPreviews((prev) => prev.filter((_, idx) => idx !== i));
+  };
+
+  const deleteExistingImage = async (imgId) => {
+    try {
+      await api.delete(`/clubs/images/${imgId}`);
+      setClubImages((prev) => prev.filter((img) => img.id !== imgId));
+      toast.success('Đã xóa ảnh');
+    } catch { toast.error('Không thể xóa ảnh'); }
   };
 
   const updateDept = (i, k, v) => setDepts((prev) => prev.map((d, idx) => idx === i ? { ...d, [k]: v } : d));
@@ -74,6 +144,8 @@ export default function AdminClubs() {
       fetchClubs();
     } catch { toast.error('Không thể xóa'); }
   };
+
+  const totalImages = clubImages.length + newFiles.length;
 
   return (
     <div className="max-w-6xl space-y-6">
@@ -134,6 +206,7 @@ export default function AdminClubs() {
               <h2 className="font-bold text-slate-800 text-lg">{editId ? 'Chỉnh sửa CLB' : 'Thêm CLB mới'}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-xl"><X size={18} /></button>
             </div>
+
             <form onSubmit={save} className="p-6 space-y-6">
 
               {/* Tên CLB */}
@@ -207,8 +280,82 @@ export default function AdminClubs() {
                 </div>
               </div>
 
-              <button type="submit" disabled={saving} className="btn-primary w-full justify-center">
-                <Save size={16} /> {saving ? 'Đang lưu...' : 'Lưu thông tin'}
+              {/* Hình ảnh CLB */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Hình ảnh CLB</p>
+                  <span className="text-xs text-slate-400">{totalImages}/10 ảnh</span>
+                </div>
+
+                {/* Image grid */}
+                {(clubImages.length > 0 || previews.length > 0) && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Existing images from Cloudinary */}
+                    {clubImages.map((img) => (
+                      <div key={img.id} className="relative group rounded-xl overflow-hidden aspect-square bg-slate-100">
+                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => deleteExistingImage(img.id)}
+                          className="absolute top-1.5 right-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* New files preview */}
+                    {previews.map((url, i) => (
+                      <div key={`new-${i}`} className="relative group rounded-xl overflow-hidden aspect-square bg-slate-100">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute bottom-1.5 left-1.5">
+                          <span className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium">Mới</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeNewFile(i)}
+                          className="absolute top-1.5 right-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={11} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {totalImages === 0 && (
+                  <div className="flex items-center gap-2 text-sm text-slate-400 py-2">
+                    <ImageIcon size={16} /> Chưa có ảnh nào
+                  </div>
+                )}
+
+                {/* Upload zone */}
+                {totalImages < 10 && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 rounded-xl py-5 flex flex-col items-center gap-1.5 text-slate-400 hover:text-indigo-500 transition-all"
+                  >
+                    <Upload size={20} />
+                    <span className="text-sm font-medium">Chọn ảnh để upload</span>
+                    <span className="text-xs">PNG, JPG, WEBP · tối đa 5MB mỗi ảnh</span>
+                  </button>
+                )}
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
+
+              <button type="submit" disabled={saving || uploading} className="btn-primary w-full justify-center">
+                <Save size={16} />
+                {saving || uploading ? 'Đang lưu...' : 'Lưu thông tin'}
               </button>
             </form>
           </div>

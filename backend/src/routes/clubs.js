@@ -1,6 +1,25 @@
 const router = require('express').Router();
 const db = require('../config/database');
 const { auth, adminOnly, leaderOrAdmin } = require('../middleware/auth');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'clb-images',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 900, crop: 'limit', quality: 'auto' }],
+  },
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // ── Specific routes MUST come before /:slug ─────────────────────────────────
 
@@ -122,6 +141,32 @@ router.put('/:id', auth, leaderOrAdmin, (req, res) => {
 router.delete('/:id', auth, adminOnly, (req, res) => {
   db.prepare('DELETE FROM clubs WHERE id = ?').run(req.params.id);
   res.json({ message: 'Đã xóa CLB' });
+});
+
+// Get images for a club
+router.get('/:id/images', (req, res) => {
+  const images = db.prepare('SELECT * FROM club_images WHERE club_id = ? ORDER BY uploaded_at DESC').all(req.params.id);
+  res.json(images);
+});
+
+// Upload images for a club (admin) — stored on Cloudinary
+router.post('/:id/images', auth, adminOnly, upload.array('images', 10), (req, res) => {
+  if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'Không có file nào được upload' });
+  const insert = db.prepare('INSERT INTO club_images (club_id, url, public_id) VALUES (?, ?, ?)');
+  const inserted = req.files.map((f) => {
+    const result = insert.run(req.params.id, f.path, f.filename);
+    return { id: result.lastInsertRowid, club_id: req.params.id, url: f.path, public_id: f.filename };
+  });
+  res.status(201).json(inserted);
+});
+
+// Delete a club image (admin) — also removes from Cloudinary
+router.delete('/images/:imageId', auth, adminOnly, async (req, res) => {
+  const img = db.prepare('SELECT * FROM club_images WHERE id = ?').get(req.params.imageId);
+  if (!img) return res.status(404).json({ error: 'Ảnh không tồn tại' });
+  try { await cloudinary.uploader.destroy(img.public_id); } catch {}
+  db.prepare('DELETE FROM club_images WHERE id = ?').run(req.params.imageId);
+  res.json({ message: 'Đã xóa ảnh' });
 });
 
 module.exports = router;
