@@ -98,8 +98,11 @@ export default function ClubDetail() {
         {/* Club header card */}
         <div className="bg-white rounded-3xl shadow-xl -mt-16 md:-mt-20 p-6 md:p-8 relative z-10 mb-6">
           <div className="flex flex-col md:flex-row gap-6">
-            <div className={`w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-4xl font-black text-white shadow-lg shrink-0`}>
-              {club.name?.charAt(0)}
+            <div className={`w-20 h-20 md:w-24 md:h-24 rounded-3xl shadow-lg shrink-0 overflow-hidden ${images.length === 0 ? `bg-gradient-to-br ${cat.color} flex items-center justify-center` : ''}`}>
+              {images.length > 0
+                ? <img src={images[0].url} alt={club.name} className="w-full h-full object-cover" />
+                : <span className="text-4xl font-black text-white">{club.name?.charAt(0)}</span>
+              }
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-start justify-between gap-3">
