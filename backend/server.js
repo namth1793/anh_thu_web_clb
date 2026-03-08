@@ -4,9 +4,14 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
+
+// Uploads directory (configurable for Railway Volume)
+const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const io = new Server(server, {
   cors: {
@@ -22,7 +27,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // Init DB (creates tables + seeds if not exist)
 require('./src/config/database');
