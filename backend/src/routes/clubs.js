@@ -129,11 +129,11 @@ router.post('/', auth, adminOnly, (req, res) => {
 
 // Update club (admin or leader of that club)
 router.put('/:id', auth, leaderOrAdmin, (req, res) => {
-  const { name, category, short_desc, description, founded_year, leader_name, contact_email, contact_fb, leader_fb, activities, departments, is_featured } = req.body;
+  const { name, category, short_desc, description, founded_year, member_count, leader_name, contact_email, contact_fb, leader_fb, activities, departments, is_featured } = req.body;
   db.prepare(`
-    UPDATE clubs SET name=?, category=?, short_desc=?, description=?, founded_year=?,
+    UPDATE clubs SET name=?, category=?, short_desc=?, description=?, founded_year=?, member_count=?,
     leader_name=?, contact_email=?, contact_fb=?, leader_fb=?, activities=?, departments=?, is_featured=? WHERE id=?
-  `).run(name, category, short_desc, description, founded_year, leader_name || null, contact_email, contact_fb, leader_fb || null, activities || null, departments || null, is_featured || 0, req.params.id);
+  `).run(name, category, short_desc, description, founded_year, member_count || 0, leader_name || null, contact_email, contact_fb, leader_fb || null, activities || null, departments || null, is_featured || 0, req.params.id);
   const club = db.prepare('SELECT * FROM clubs WHERE id = ?').get(req.params.id);
   res.json(club);
 });

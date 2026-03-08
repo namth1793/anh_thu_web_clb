@@ -7,7 +7,7 @@ const emptyForm = {
   name: '', slug: '', category: 'technology', short_desc: '',
   description: '', contact_fb: '', leader_name: '', leader_fb: '',
   activities: '', founded_year: new Date().getFullYear(),
-  contact_email: '', is_featured: 0,
+  contact_email: '', is_featured: 0, member_count: 0,
 };
 const emptyDept = { name: '', desc: '' };
 
@@ -57,7 +57,7 @@ export default function AdminClubs() {
       description: c.description || '', contact_fb: c.contact_fb || '',
       leader_name: c.leader_name || '', leader_fb: c.leader_fb || '',
       activities: c.activities || '', founded_year: c.founded_year || '',
-      contact_email: c.contact_email || '', is_featured: c.is_featured,
+      contact_email: c.contact_email || '', is_featured: c.is_featured, member_count: c.member_count || 0,
     });
     let parsed = [{ ...emptyDept }];
     try { if (c.departments) parsed = JSON.parse(c.departments); } catch {}
@@ -210,9 +210,15 @@ export default function AdminClubs() {
             <form onSubmit={save} className="p-6 space-y-6">
 
               {/* Tên CLB */}
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Tên CLB *</label>
-                <input value={form.name} onChange={set('name')} className="input" required />
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Tên CLB *</label>
+                  <input value={form.name} onChange={set('name')} className="input" required />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Số thành viên</label>
+                  <input type="number" min="0" value={form.member_count} onChange={set('member_count')} className="input" placeholder="0" />
+                </div>
               </div>
 
               {/* Leader */}
