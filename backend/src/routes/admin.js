@@ -60,7 +60,8 @@ router.delete('/users/:id', (req, res) => {
 // Get all clubs (admin view with full info)
 router.get('/clubs', (req, res) => {
   const clubs = db.prepare(`
-    SELECT c.*, u.name as leader_name
+    SELECT c.*, u.name as leader_name,
+      (SELECT url FROM club_images WHERE club_id = c.id ORDER BY uploaded_at ASC LIMIT 1) as cover_image
     FROM clubs c LEFT JOIN users u ON c.leader_id = u.id
     ORDER BY c.created_at DESC
   `).all();

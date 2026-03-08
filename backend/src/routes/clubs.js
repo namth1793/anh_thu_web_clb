@@ -48,7 +48,8 @@ router.get('/me/saved', auth, (req, res) => {
 router.get('/', (req, res) => {
   const { search = '', category = '', featured } = req.query;
   let sql = `
-    SELECT c.*, u.name as leader_name, u.avatar as leader_avatar, u.major as leader_major
+    SELECT c.*, u.name as leader_name, u.avatar as leader_avatar, u.major as leader_major,
+      (SELECT url FROM club_images WHERE club_id = c.id ORDER BY uploaded_at ASC LIMIT 1) as cover_image
     FROM clubs c
     LEFT JOIN users u ON c.leader_id = u.id
     WHERE 1=1

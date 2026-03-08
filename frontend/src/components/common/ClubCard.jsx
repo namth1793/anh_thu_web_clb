@@ -19,14 +19,17 @@ export default function ClubCard({ club, index = 0 }) {
       className="card-hover card-glow group block"
     >
       {/* Banner */}
-      <div className={`h-32 bg-gradient-to-br ${cat.color} relative overflow-hidden`}>
-        {/* Dot pattern */}
-        <div className="absolute inset-0 opacity-20"
-          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
-        />
+      <div className={`h-32 relative overflow-hidden ${!club.cover_image ? `bg-gradient-to-br ${cat.color}` : ''}`}>
+        {club.cover_image ? (
+          <img src={club.cover_image} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 opacity-20"
+            style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '18px 18px' }}
+          />
+        )}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/20 to-transparent" />
 
-        {/* Icon – inside banner so overflow-hidden doesn't clip it */}
+        {/* Icon */}
         <div className="absolute bottom-3 left-4 w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-300">
           {cat.icon}
         </div>
