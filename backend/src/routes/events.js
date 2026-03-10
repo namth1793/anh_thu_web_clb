@@ -1,6 +1,25 @@
 const router = require('express').Router();
 const db = require('../config/database');
 const { auth, adminOnly, leaderOrAdmin } = require('../middleware/auth');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const eventStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'clb-events',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 675, crop: 'limit', quality: 'auto' }],
+  },
+});
+const uploadEvent = multer({ storage: eventStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // Get user's registered events (must be before /:id)
 router.get('/me/registered', auth, (req, res) => {
@@ -76,6 +95,14 @@ router.delete('/:id/register', auth, (req, res) => {
 router.get('/:id/register-status', auth, (req, res) => {
   const reg = db.prepare('SELECT id FROM event_registrations WHERE event_id = ? AND user_id = ?').get(req.params.id, req.user.id);
   res.json({ registered: !!reg });
+});
+
+// Upload event image
+router.post('/:id/image', auth, leaderOrAdmin, uploadEvent.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Không có file ảnh' });
+  const url = req.file.path;
+  db.prepare('UPDATE events SET image = ? WHERE id = ?').run(url, req.params.id);
+  res.json({ url });
 });
 
 // Create event

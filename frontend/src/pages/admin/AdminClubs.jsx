@@ -221,6 +221,25 @@ export default function AdminClubs() {
                 </div>
               </div>
 
+              {/* Danh mục + Mô tả ngắn */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Danh mục *</label>
+                  <select value={form.category} onChange={set('category')} className="input" required>
+                    <option value="technology">Công nghệ</option>
+                    <option value="academic">Học thuật</option>
+                    <option value="media">Truyền thông</option>
+                    <option value="art">Nghệ thuật</option>
+                    <option value="sports">Thể thao</option>
+                    <option value="community">Cộng đồng</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Mô tả ngắn</label>
+                  <input value={form.short_desc} onChange={set('short_desc')} className="input" placeholder="Mô tả ngắn gọn..." />
+                </div>
+              </div>
+
               {/* Leader */}
               <div className="space-y-3 pt-2 border-t border-slate-100">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Leader</p>
