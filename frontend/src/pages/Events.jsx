@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Clock, Search, CheckCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, Search, CheckCircle, X, Users } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -20,7 +20,16 @@ export default function Events() {
   const [status, setStatus] = useState('upcoming');
   const [search, setSearch] = useState('');
   const [registered, setRegistered] = useState({});
+  const [detailEvent, setDetailEvent] = useState(null);
   const { user } = useAuth();
+
+  const openDetail = async (ev) => {
+    setDetailEvent(ev);
+    try {
+      const r = await api.get(`/events/${ev.id}`);
+      setDetailEvent(r.data);
+    } catch {}
+  };
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -100,7 +109,7 @@ export default function Events() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <h2 className="font-bold text-slate-800 text-lg flex-1">{ev.title}</h2>
+                    <button onClick={() => openDetail(ev)} className="font-bold text-slate-800 text-lg flex-1 text-left hover:text-indigo-600 transition-colors">{ev.title}</button>
                     <span className={`badge shrink-0 text-xs ${ev.status === 'upcoming' ? 'bg-green-100 text-green-700' : ev.status === 'ongoing' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
                       {ev.status === 'upcoming' ? 'Sắp diễn ra' : ev.status === 'ongoing' ? 'Đang diễn ra' : 'Đã kết thúc'}
                     </span>
@@ -131,6 +140,70 @@ export default function Events() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {detailEvent && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setDetailEvent(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 sticky top-0 bg-white rounded-t-3xl z-10">
+              <h2 className="font-bold text-slate-800">Chi tiết sự kiện</h2>
+              <button onClick={() => setDetailEvent(null)} className="p-2 hover:bg-slate-100 rounded-xl"><X size={18} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              {detailEvent.image && (
+                <img src={detailEvent.image} alt={detailEvent.title} className="w-full h-52 object-cover rounded-2xl" />
+              )}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">{detailEvent.title}</h3>
+                <Link to={`/clubs/${detailEvent.club_slug}`} onClick={() => setDetailEvent(null)}
+                  className="text-indigo-600 text-sm font-medium hover:underline mt-1 inline-block">
+                  📌 {detailEvent.club_name}
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <p className="text-xs text-slate-400 mb-1">Bắt đầu</p>
+                  <p className="font-medium text-slate-700">{detailEvent.start_time ? fmt(detailEvent.start_time) : '—'}</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <p className="text-xs text-slate-400 mb-1">Kết thúc</p>
+                  <p className="font-medium text-slate-700">{detailEvent.end_time ? fmt(detailEvent.end_time) : '—'}</p>
+                </div>
+              </div>
+              {detailEvent.location && (
+                <div className="bg-slate-50 rounded-xl p-3 text-sm flex items-start gap-2">
+                  <MapPin size={14} className="text-slate-400 mt-0.5 shrink-0" />
+                  <p className="font-medium text-slate-700">{detailEvent.location}</p>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <span className={`badge text-xs ${detailEvent.status === 'upcoming' ? 'bg-green-100 text-green-700' : detailEvent.status === 'ongoing' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {detailEvent.status === 'upcoming' ? 'Sắp diễn ra' : detailEvent.status === 'ongoing' ? 'Đang diễn ra' : 'Đã kết thúc'}
+                </span>
+                {detailEvent.registrations !== undefined && (
+                  <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full flex items-center gap-1">
+                    <Users size={11} /> {detailEvent.registrations} người đăng ký
+                  </span>
+                )}
+              </div>
+              {detailEvent.description && (
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Mô tả</p>
+                  <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{detailEvent.description}</p>
+                </div>
+              )}
+              {detailEvent.status !== 'past' && (
+                <button
+                  onClick={() => { toggleRegister(detailEvent.id); setDetailEvent(null); }}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${registered[detailEvent.id] ? 'bg-green-100 text-green-700 border-2 border-green-200' : 'btn-primary'}`}
+                >
+                  {registered[detailEvent.id] ? <><CheckCircle size={15} /> Đã đăng ký — Huỷ đăng ký</> : 'Đăng ký tham gia'}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
