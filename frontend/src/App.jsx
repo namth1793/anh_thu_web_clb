@@ -12,6 +12,7 @@ import Events from './pages/Events';
 import Categories from './pages/Categories';
 import Suggest from './pages/Suggest';
 import News from './pages/News';
+import NewsDetail from './pages/NewsDetail';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -52,6 +53,7 @@ export default function App() {
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/suggest" element={<Suggest />} />
                   <Route path="/news" element={<News />} />
+                  <Route path="/news/:id" element={<NewsDetail />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route

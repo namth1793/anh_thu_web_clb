@@ -77,8 +77,10 @@ export default function News() {
                   {typeLabels[p.type] || p.type}
                 </span>
               </div>
-              <h3 className="font-bold text-slate-800 line-clamp-2 mb-2">{p.title}</h3>
-              <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">{p.content}</p>
+              <Link to={`/news/${p.id}`} className="block group">
+                <h3 className="font-bold text-slate-800 line-clamp-2 mb-2 group-hover:text-indigo-600 transition-colors">{p.title}</h3>
+                <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">{p.content}</p>
+              </Link>
               <p className="text-xs text-slate-400 mt-3">
                 {p.author_name} · {p.created_at?.slice(0, 10)}
               </p>
