@@ -60,27 +60,7 @@ export default function Login() {
             <button type="submit" disabled={loading} className="btn-primary w-full justify-center mt-2">
               {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
-          </form>
-
-          {/* Quick demo logins */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <p className="text-xs text-slate-400 text-center mb-3">Demo accounts (click để điền tự động)</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: '👑 Admin', email: 'admin@fpt.edu.vn', pass: 'admin123' },
-                { label: '🏆 Leader', email: 'khoi.nm@fpt.edu.vn', pass: 'leader123' },
-                { label: '🎓 Student', email: 'anh.ph@fpt.edu.vn', pass: 'user123' },
-              ].map((d) => (
-                <button
-                  key={d.email}
-                  onClick={() => quickLogin(d.email, d.pass)}
-                  className="text-xs border border-slate-200 rounded-lg px-2 py-2 hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-slate-600 text-center"
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          </form>          
         </div>
 
         <p className="text-center text-sm text-slate-500 mt-6">
