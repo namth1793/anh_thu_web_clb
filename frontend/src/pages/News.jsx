@@ -65,8 +65,11 @@ export default function News() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {posts.map((p) => (
-            <div key={p.id} className="card p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between gap-2 mb-3">
+            <div key={p.id} className="card p-5 hover:shadow-md transition-shadow relative group">
+              {/* Full-card link */}
+              <Link to={`/news/${p.id}`} className="absolute inset-0 z-0" aria-label={p.title} />
+
+              <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
                 <Link to={`/clubs/${p.club_slug}`} className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
                     {p.club_name?.charAt(0)}
@@ -77,11 +80,9 @@ export default function News() {
                   {typeLabels[p.type] || p.type}
                 </span>
               </div>
-              <Link to={`/news/${p.id}`} className="block group">
-                <h3 className="font-bold text-slate-800 line-clamp-2 mb-2 group-hover:text-indigo-600 transition-colors">{p.title}</h3>
-                <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">{p.content}</p>
-              </Link>
-              <p className="text-xs text-slate-400 mt-3">
+              <h3 className="font-bold text-slate-800 line-clamp-2 mb-2 group-hover:text-indigo-600 transition-colors relative z-10">{p.title}</h3>
+              <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed relative z-10">{p.content}</p>
+              <p className="text-xs text-slate-400 mt-3 relative z-10">
                 {p.author_name} · {p.created_at?.slice(0, 10)}
               </p>
             </div>
