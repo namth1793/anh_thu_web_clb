@@ -279,11 +279,11 @@ export default function ClubDetail() {
                   <p>Chưa có bài viết nào</p>
                 </div>
               ) : club.posts?.map((p) => (
-                <div key={p.id} className="card p-6">
-                  <h3 className="font-bold text-slate-800 mb-2">{p.title}</h3>
+                <Link key={p.id} to={`/news/${p.id}`} className="card p-6 block hover:shadow-md transition-shadow group">
+                  <h3 className="font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{p.title}</h3>
                   <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{p.content}</p>
                   <p className="text-xs text-slate-400 mt-3">{p.author_name} · {p.created_at?.slice(0, 10)}</p>
-                </div>
+                </Link>
               ))}
             </div>
           )}

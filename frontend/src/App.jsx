@@ -13,6 +13,7 @@ import Categories from './pages/Categories';
 import Suggest from './pages/Suggest';
 import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
+import EventDetail from './pages/EventDetail';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -50,6 +51,7 @@ export default function App() {
                   <Route path="/clubs" element={<Clubs />} />
                   <Route path="/clubs/:slug" element={<ClubDetail />} />
                   <Route path="/events" element={<Events />} />
+                  <Route path="/events/:id" element={<EventDetail />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/suggest" element={<Suggest />} />
                   <Route path="/news" element={<News />} />

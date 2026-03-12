@@ -14,7 +14,7 @@ export default function EventCard({ event, index = 0 }) {
   const fmt = (d) => { try { return format(parseISO(d), 'dd/MM/yyyy HH:mm', { locale: vi }); } catch { return d; } };
 
   return (
-    <div className="card group flex gap-0 overflow-hidden hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300">
+    <Link to={`/events/${event.id}`} className="card group flex gap-0 overflow-hidden hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 block">
       {/* Date sidebar */}
       <div className="shrink-0 w-16 bg-gradient-to-b from-indigo-600 to-violet-600 flex flex-col items-center justify-center text-white py-4 px-1">
         <span className="text-2xl font-black leading-none">
@@ -55,6 +55,6 @@ export default function EventCard({ event, index = 0 }) {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
