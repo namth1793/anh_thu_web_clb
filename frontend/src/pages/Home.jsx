@@ -18,13 +18,22 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [featuredClubs, setFeaturedClubs] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [stats, setStats] = useState({ clubs: 16, totalMembers: 900, events: 50 });
+  const [stats, setStats] = useState({ clubs: 0, totalMembers: 0, events: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/clubs?featured=1').then((r) => setFeaturedClubs(r.data.slice(0, 4))).catch(() => {});
-    api.get('/events/upcoming').then((r) => setUpcomingEvents(r.data)).catch(() => {});
-    api.get('/public/stats').then((r) => setStats(r.data.stats)).catch(() => {});
+    // Fetch all clubs → derive real count + totalMembers + featured display
+    api.get('/clubs').then((r) => {
+      const all = r.data;
+      const totalMembers = all.reduce((sum, c) => sum + (c.member_count || 0), 0);
+      setStats((prev) => ({ ...prev, clubs: all.length, totalMembers }));
+      const featured = all.filter((c) => c.is_featured).slice(0, 4);
+      setFeaturedClubs(featured.length > 0 ? featured : all.slice(0, 4));
+    }).catch(() => {});
+    api.get('/events/upcoming').then((r) => {
+      setUpcomingEvents(r.data);
+      setStats((prev) => ({ ...prev, events: r.data.length }));
+    }).catch(() => {});
   }, []);
 
   const handleSearch = (e) => {
@@ -62,7 +71,7 @@ export default function Home() {
           </h1>
 
           <p className="animate-fade-in-up delay-100 text-indigo-200 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Hơn <strong className="text-white">{stats?.clubs || 16}</strong> câu lạc bộ đang chờ đón bạn. Học kỹ năng, kết bạn, trải nghiệm và phát triển bản thân cùng cộng đồng sinh viên FPT Đà Nẵng.
+            Hơn <strong className="text-white">{stats?.clubs || '...'}</strong> câu lạc bộ đang chờ đón bạn. Học kỹ năng, kết bạn, trải nghiệm và phát triển bản thân cùng cộng đồng sinh viên FPT Đà Nẵng.
           </p>
 
           {/* Search bar */}
@@ -98,9 +107,9 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-3 gap-6 text-center">
             {[
-              { icon: Trophy,    color: 'text-amber-500', bg: 'bg-amber-50', value: `${stats?.clubs || 16}+`,            label: 'Câu lạc bộ', delay: '0s' },
-              { icon: Users,     color: 'text-indigo-500', bg: 'bg-indigo-50', value: `${stats?.totalMembers || 900}+`,  label: 'Thành viên', delay: '0.1s' },
-              { icon: Calendar,  color: 'text-emerald-500', bg: 'bg-emerald-50', value: `${stats?.events || 50}+`,       label: 'Sự kiện/năm', delay: '0.2s' },
+              { icon: Trophy,    color: 'text-amber-500', bg: 'bg-amber-50', value: stats?.clubs ? `${stats.clubs}+` : '...',               label: 'Câu lạc bộ', delay: '0s' },
+              { icon: Users,     color: 'text-indigo-500', bg: 'bg-indigo-50', value: stats?.totalMembers ? `${stats.totalMembers}+` : '...',  label: 'Thành viên', delay: '0.1s' },
+              { icon: Calendar,  color: 'text-emerald-500', bg: 'bg-emerald-50', value: stats?.events ? `${stats.events}+` : '...',            label: 'Sự kiện/năm', delay: '0.2s' },
             ].map(({ icon: Icon, color, bg, value, label, delay }) => (
               <div key={label} className="animate-scale-in" style={{ animationDelay: delay }}>
                 <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center mx-auto mb-3`}>
