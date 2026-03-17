@@ -123,6 +123,52 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Upcoming Events Carousel ─────────────────── */}
+      <section className="py-16 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="animate-fade-in-left">
+              <h2 className="section-title">Sự kiện sắp diễn ra</h2>
+              <p className="text-slate-500 mt-1 text-sm">Đừng bỏ lỡ những hoạt động thú vị</p>
+            </div>
+            <Link to="/events" className="btn-ghost hidden md:flex animate-fade-in-right">
+              Xem tất cả <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
+        {upcomingEvents.length === 0 ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="card h-24 shimmer" />)}
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Fade edges */}
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-white to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-white to-transparent" />
+
+            <div
+              className="flex gap-4 w-max px-4"
+              style={{ animation: 'carousel-ltr 45s linear infinite' }}
+              onMouseEnter={(e) => (e.currentTarget.style.animationPlayState = 'paused')}
+              onMouseLeave={(e) => (e.currentTarget.style.animationPlayState = 'running')}
+            >
+              {[...upcomingEvents, ...upcomingEvents].map((ev, i) => (
+                <div key={`${ev.id}-${i}`} className="w-80 shrink-0">
+                  <EventCard event={ev} index={i} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="text-center mt-8">
+          <Link to="/events" className="btn-secondary mx-auto">
+            Xem tất cả sự kiện <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
       {/* ── Categories ───────────────────────────────── */}
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between mb-8">
@@ -182,52 +228,6 @@ export default function Home() {
               Khám phá tất cả CLB <ArrowRight size={16} />
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── Upcoming Events Carousel ─────────────────── */}
-      <section className="py-16 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="animate-fade-in-left">
-              <h2 className="section-title">Sự kiện sắp diễn ra</h2>
-              <p className="text-slate-500 mt-1 text-sm">Đừng bỏ lỡ những hoạt động thú vị</p>
-            </div>
-            <Link to="/events" className="btn-ghost hidden md:flex animate-fade-in-right">
-              Xem tất cả <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-
-        {upcomingEvents.length === 0 ? (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => <div key={i} className="card h-24 shimmer" />)}
-          </div>
-        ) : (
-          <div className="relative">
-            {/* Fade edges */}
-            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-white to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-white to-transparent" />
-
-            <div
-              className="flex gap-4 w-max px-4"
-              style={{ animation: 'carousel-ltr 45s linear infinite' }}
-              onMouseEnter={(e) => (e.currentTarget.style.animationPlayState = 'paused')}
-              onMouseLeave={(e) => (e.currentTarget.style.animationPlayState = 'running')}
-            >
-              {[...upcomingEvents, ...upcomingEvents].map((ev, i) => (
-                <div key={`${ev.id}-${i}`} className="w-80 shrink-0">
-                  <EventCard event={ev} index={i} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="text-center mt-8">
-          <Link to="/events" className="btn-secondary mx-auto">
-            Xem tất cả sự kiện <ArrowRight size={16} />
-          </Link>
         </div>
       </section>
 
