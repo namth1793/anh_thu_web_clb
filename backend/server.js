@@ -45,6 +45,17 @@ app.use('/api/admin', require('./src/routes/admin'));
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
 
+// Public stats (no auth required) — used by Home page for all users
+app.get('/api/public/stats', (req, res) => {
+  const db = require('./src/config/database');
+  const stats = {
+    clubs: db.prepare('SELECT COUNT(*) as c FROM clubs').get().c,
+    totalMembers: db.prepare('SELECT SUM(member_count) as s FROM clubs').get().s || 0,
+    events: db.prepare('SELECT COUNT(*) as c FROM events').get().c,
+  };
+  res.json({ stats });
+});
+
 // Socket.io
 require('./src/socket')(io);
 

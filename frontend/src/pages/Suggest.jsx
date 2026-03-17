@@ -52,6 +52,77 @@ const QUESTIONS = [
       { label: '🔴 6+ giờ (cống hiến hết mình)', value: 'high', points: { technology: 2, sports: 2 } },
     ],
   },
+  {
+    id: 'personality',
+    question: 'Tính cách nào mô tả đúng bạn nhất?',
+    icon: '🌟',
+    options: [
+      { label: '😎 Sáng tạo & Nghệ sĩ', value: 'creative', points: { art: 3, media: 2 } },
+      { label: '🤓 Phân tích & Logic', value: 'analytical', points: { technology: 3, academic: 2 } },
+      { label: '😄 Hướng ngoại & Năng động', value: 'extrovert', points: { community: 2, sports: 2, media: 1 } },
+      { label: '📖 Kiên nhẫn & Tỉ mỉ', value: 'patient', points: { academic: 3 } },
+      { label: '🏃 Quyết đoán & Nhanh nhẹn', value: 'decisive', points: { sports: 3, technology: 1 } },
+    ],
+  },
+  {
+    id: 'teamwork',
+    question: 'Bạn thích làm việc như thế nào?',
+    icon: '👥',
+    options: [
+      { label: '🧑‍💻 Tự do làm việc cá nhân', value: 'solo', points: { technology: 2, art: 2 } },
+      { label: '🤝 Làm việc nhóm nhỏ thân thiết', value: 'smallteam', points: { community: 2, academic: 2 } },
+      { label: '🎪 Sự kiện lớn, đội hình đông vui', value: 'bigteam', points: { media: 2, sports: 2, community: 1 } },
+      { label: '🎭 Vừa sáng tác vừa trình diễn', value: 'perform', points: { art: 3, media: 1 } },
+    ],
+  },
+  {
+    id: 'achievement',
+    question: 'Thành tích nào bạn muốn đạt được nhất?',
+    icon: '🏆',
+    options: [
+      { label: '🥇 Giành giải thưởng thi đấu', value: 'award', points: { sports: 3, technology: 2 } },
+      { label: '🎨 Tạo ra sản phẩm sáng tạo', value: 'create', points: { art: 3, media: 2 } },
+      { label: '🌍 Tạo ra ảnh hưởng xã hội', value: 'impact', points: { community: 3 } },
+      { label: '💼 Xây dựng kỹ năng nghề nghiệp', value: 'career', points: { academic: 3, technology: 2 } },
+      { label: '📣 Được nhiều người biết đến', value: 'fame', points: { media: 3, community: 1 } },
+    ],
+  },
+  {
+    id: 'environment',
+    question: 'Môi trường hoạt động lý tưởng với bạn?',
+    icon: '🌈',
+    options: [
+      { label: '💻 Phòng máy & Workshop kỹ thuật', value: 'lab', points: { technology: 3 } },
+      { label: '🎭 Sân khấu & Studio sáng tạo', value: 'stage', points: { art: 3, media: 2 } },
+      { label: '🏟️ Sân thể thao & Ngoài trời', value: 'outdoor', points: { sports: 3, community: 1 } },
+      { label: '📚 Thư viện & Phòng học nhóm', value: 'library', points: { academic: 3 } },
+      { label: '🌱 Cộng đồng & Các hoạt động xã hội', value: 'social', points: { community: 3, media: 1 } },
+    ],
+  },
+  {
+    id: 'inspiration',
+    question: 'Điều gì truyền cảm hứng cho bạn mỗi ngày?',
+    icon: '💫',
+    options: [
+      { label: '🚀 Công nghệ & Đổi mới', value: 'tech', points: { technology: 3 } },
+      { label: '🎶 Âm nhạc, phim ảnh & nghệ thuật', value: 'arts', points: { art: 3, media: 2 } },
+      { label: '❤️ Giúp đỡ và kết nối mọi người', value: 'helping', points: { community: 3 } },
+      { label: '🏅 Cạnh tranh & Vượt qua giới hạn', value: 'compete', points: { sports: 3, technology: 1 } },
+      { label: '📖 Kiến thức & Học hỏi không ngừng', value: 'knowledge', points: { academic: 3, technology: 1 } },
+    ],
+  },
+  {
+    id: 'social',
+    question: 'Bạn muốn gặp gỡ ai trong CLB?',
+    icon: '🤗',
+    options: [
+      { label: '👨‍💻 Những developer & kỹ sư tài năng', value: 'devs', points: { technology: 3 } },
+      { label: '🎨 Các nghệ sĩ, designer & photographer', value: 'artists', points: { art: 2, media: 2 } },
+      { label: '🌍 Người yêu tình nguyện & cộng đồng', value: 'volunteers', points: { community: 3 } },
+      { label: '🎙️ Diễn giả, content creator & MC', value: 'creators', points: { media: 3, academic: 1 } },
+      { label: '⚽ Vận động viên & người yêu thể thao', value: 'athletes', points: { sports: 3 } },
+    ],
+  },
 ];
 
 export default function Suggest() {

@@ -116,6 +116,10 @@
   from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
   to   { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
 }
+@keyframes carousel-ltr {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0%); }
+}
 
 /* Utility classes */
 .animate-fade-in-up     { animation: fadeInUp 0.6s cubic-bezier(.22,1,.36,1) both; }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ArrowRight, Users, Calendar, Trophy, Star, Zap, Sparkles, TrendingUp } from 'lucide-react';
+import { Search, ArrowRight, Users, Calendar, Trophy, Zap, Sparkles, TrendingUp } from 'lucide-react';
 import api from '../utils/api';
 import ClubCard from '../components/common/ClubCard';
 import EventCard from '../components/common/EventCard';
@@ -23,8 +23,8 @@ export default function Home() {
 
   useEffect(() => {
     api.get('/clubs?featured=1').then((r) => setFeaturedClubs(r.data.slice(0, 4))).catch(() => {});
-    api.get('/events/upcoming').then((r) => setUpcomingEvents(r.data.slice(0, 4))).catch(() => {});
-    api.get('/admin/stats').then((r) => setStats(r.data.stats)).catch(() => {});
+    api.get('/events/upcoming').then((r) => setUpcomingEvents(r.data)).catch(() => {});
+    api.get('/public/stats').then((r) => setStats(r.data.stats)).catch(() => {});
   }, []);
 
   const handleSearch = (e) => {
@@ -55,10 +55,10 @@ export default function Home() {
 
           {/* Headline */}
           <h1 className="animate-fade-in-up text-4xl md:text-6xl font-black leading-tight mb-6">
-            Khám phá &amp;{' '}
-            <span className="gradient-text-animated">Tham gia CLB</span>
+            Bứt phá &amp; Tỏa sáng{' '}
+            <span className="gradient-text-animated">cùng CLB</span>
             <br />
-            phù hợp với bạn
+            dành riêng cho bạn 🔥
           </h1>
 
           <p className="animate-fade-in-up delay-100 text-indigo-200 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -176,24 +176,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Upcoming Events ──────────────────────────── */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="animate-fade-in-left">
-            <h2 className="section-title">Sự kiện sắp diễn ra</h2>
-            <p className="text-slate-500 mt-1 text-sm">Đừng bỏ lỡ những hoạt động thú vị</p>
+      {/* ── Upcoming Events Carousel ─────────────────── */}
+      <section className="py-16 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="animate-fade-in-left">
+              <h2 className="section-title">Sự kiện sắp diễn ra</h2>
+              <p className="text-slate-500 mt-1 text-sm">Đừng bỏ lỡ những hoạt động thú vị</p>
+            </div>
+            <Link to="/events" className="btn-ghost hidden md:flex animate-fade-in-right">
+              Xem tất cả <ArrowRight size={16} />
+            </Link>
           </div>
-          <Link to="/events" className="btn-ghost hidden md:flex animate-fade-in-right">
-            Xem tất cả <ArrowRight size={16} />
-          </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {upcomingEvents.length === 0 ? (
-            [...Array(4)].map((_, i) => <div key={i} className="card h-24 shimmer" />)
-          ) : (
-            upcomingEvents.map((e, i) => <EventCard key={e.id} event={e} index={i} />)
-          )}
-        </div>
+
+        {upcomingEvents.length === 0 ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="card h-24 shimmer" />)}
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Fade edges */}
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-white to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-white to-transparent" />
+
+            <div
+              className="flex gap-4 w-max px-4"
+              style={{ animation: 'carousel-ltr 45s linear infinite' }}
+              onMouseEnter={(e) => (e.currentTarget.style.animationPlayState = 'paused')}
+              onMouseLeave={(e) => (e.currentTarget.style.animationPlayState = 'running')}
+            >
+              {[...upcomingEvents, ...upcomingEvents].map((ev, i) => (
+                <div key={`${ev.id}-${i}`} className="w-80 shrink-0">
+                  <EventCard event={ev} index={i} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="text-center mt-8">
           <Link to="/events" className="btn-secondary mx-auto">
             Xem tất cả sự kiện <ArrowRight size={16} />
@@ -236,9 +257,9 @@ export default function Home() {
         />
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <div className="animate-bounce-in">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">Chưa biết chọn CLB nào?</h2>
+            <h2 className="text-3xl md:text-4xl font-black mb-4">Bạn đang hoang mang chưa biết mình sẽ phù hợp CLB nào?</h2>
             <p className="text-indigo-200 text-lg mb-8 leading-relaxed">
-              Hãy để hệ thống gợi ý CLB phù hợp nhất với bạn dựa trên sở thích và mục tiêu!
+              Bạn đang không thoải mái trong việc lựa chọn CLB. Hãy làm bài quiz này để chúng tôi gợi ý CLB phù hợp với bạn.
             </p>
             <Link to="/suggest" className="inline-flex items-center gap-2 bg-white text-indigo-700 font-bold px-8 py-4 rounded-2xl hover:bg-indigo-50 transition-all shadow-2xl hover:-translate-y-1 hover:shadow-white/20 text-lg">
               <Sparkles size={20} className="text-amber-500" /> Bắt đầu khám phá
