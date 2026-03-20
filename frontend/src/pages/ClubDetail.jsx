@@ -260,13 +260,17 @@ export default function ClubDetail() {
 
           {/* ── Sự kiện ── */}
           {tab === 'Sự kiện' && (
-            <div className="space-y-4">
+            <div>
               {club.events?.length === 0 ? (
                 <div className="text-center py-16 text-slate-400">
                   <Calendar size={40} className="mx-auto mb-3 opacity-40" />
                   <p>Chưa có sự kiện nào</p>
                 </div>
-              ) : club.events?.map((e) => <EventCard key={e.id} event={e} />)}
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {club.events?.map((e, i) => <EventCard key={e.id} event={e} index={i} />)}
+                </div>
+              )}
             </div>
           )}
 

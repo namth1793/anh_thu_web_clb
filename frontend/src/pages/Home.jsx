@@ -148,7 +148,7 @@ export default function Home() {
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-white to-transparent" />
 
             <div
-              className="flex gap-4 w-max px-4"
+              className="flex items-stretch gap-4 w-max px-4"
               style={{ animation: 'carousel-ltr 45s linear infinite' }}
               onMouseEnter={(e) => (e.currentTarget.style.animationPlayState = 'paused')}
               onMouseLeave={(e) => (e.currentTarget.style.animationPlayState = 'running')}
