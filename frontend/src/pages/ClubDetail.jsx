@@ -6,6 +6,7 @@ import { vi } from 'date-fns/locale';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import EventCard from '../components/common/EventCard';
+import PostCard from '../components/common/PostCard';
 import toast from 'react-hot-toast';
 
 const categoryConfig = {
@@ -276,19 +277,17 @@ export default function ClubDetail() {
 
           {/* ── Tin tức ── */}
           {tab === 'Tin tức' && (
-            <div className="space-y-4">
+            <div>
               {club.posts?.length === 0 ? (
                 <div className="text-center py-16 text-slate-400">
                   <p className="text-4xl mb-3">📰</p>
                   <p>Chưa có bài viết nào</p>
                 </div>
-              ) : club.posts?.map((p) => (
-                <Link key={p.id} to={`/news/${p.id}`} className="card p-6 block hover:shadow-md transition-shadow group">
-                  <h3 className="font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{p.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">{p.content}</p>
-                  <p className="text-xs text-slate-400 mt-3">{p.author_name} · {p.created_at?.slice(0, 10)}</p>
-                </Link>
-              ))}
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {club.posts?.map((p, i) => <PostCard key={p.id} post={p} index={i} />)}
+                </div>
+              )}
             </div>
           )}
 

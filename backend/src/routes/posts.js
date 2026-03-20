@@ -1,6 +1,25 @@
 const router = require('express').Router();
 const db = require('../config/database');
 const { auth, leaderOrAdmin, adminOnly } = require('../middleware/auth');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const postStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'clb-posts',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 675, crop: 'limit', quality: 'auto' }],
+  },
+});
+const uploadPost = multer({ storage: postStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // Get all posts
 router.get('/', (req, res) => {
@@ -32,6 +51,14 @@ router.get('/:id', (req, res) => {
   `).get(req.params.id);
   if (!post) return res.status(404).json({ error: 'Bài viết không tồn tại' });
   res.json(post);
+});
+
+// Upload post cover image
+router.post('/:id/image', auth, leaderOrAdmin, uploadPost.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Không có file ảnh' });
+  const url = req.file.path;
+  db.prepare('UPDATE posts SET image = ? WHERE id = ?').run(url, req.params.id);
+  res.json({ url });
 });
 
 // Create post

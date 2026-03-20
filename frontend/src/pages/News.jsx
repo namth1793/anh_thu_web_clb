@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import api from '../utils/api';
+import PostCard from '../components/common/PostCard';
 
 const typeFilters = [
   { id: '', label: 'Tất cả' },
@@ -11,8 +11,6 @@ const typeFilters = [
   { id: 'recap', label: '📝 Recap sự kiện' },
 ];
 
-const typeLabels = { news: '📰 Tin tức', achievement: '🏆 Thành tích', recruitment: '📢 Tuyển thành viên', recap: '📝 Recap' };
-const typeColors = { news: 'bg-blue-100 text-blue-700', achievement: 'bg-amber-100 text-amber-700', recruitment: 'bg-green-100 text-green-700', recap: 'bg-purple-100 text-purple-700' };
 
 export default function News() {
   const [posts, setPosts] = useState([]);
@@ -63,31 +61,8 @@ export default function News() {
           <p className="text-lg font-semibold text-slate-600">Chưa có bài viết nào</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {posts.map((p) => (
-            <div key={p.id} className="card p-5 hover:shadow-md transition-shadow relative group">
-              {/* Full-card link – z-10 phủ toàn thẻ */}
-              <Link to={`/news/${p.id}`} className="absolute inset-0 z-10" aria-label={p.title} />
-
-              <div className="flex items-center justify-between gap-2 mb-3">
-                {/* Link CLB dùng z-20 để nằm trên full-card link */}
-                <Link to={`/clubs/${p.club_slug}`} className="relative z-20 flex items-center gap-2 hover:text-indigo-600 transition-colors">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
-                    {p.club_name?.charAt(0)}
-                  </div>
-                  <span className="text-sm font-medium text-slate-600">{p.club_name}</span>
-                </Link>
-                <span className={`badge text-xs ${typeColors[p.type] || 'bg-slate-100 text-slate-600'}`}>
-                  {typeLabels[p.type] || p.type}
-                </span>
-              </div>
-              <h3 className="font-bold text-slate-800 line-clamp-2 mb-2 group-hover:text-indigo-600 transition-colors">{p.title}</h3>
-              <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">{p.content}</p>
-              <p className="text-xs text-slate-400 mt-3">
-                {p.author_name} · {p.created_at?.slice(0, 10)}
-              </p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {posts.map((p, i) => <PostCard key={p.id} post={p} index={i} />)}
         </div>
       )}
     </div>

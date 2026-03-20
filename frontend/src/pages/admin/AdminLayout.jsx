@@ -16,7 +16,7 @@ const navItems = [
   { to: '/admin/clubs', label: 'Câu lạc bộ', icon: Trophy },
   { to: '/admin/events', label: 'Sự kiện', icon: Calendar },
   { to: '/admin/applications', label: 'Đơn đăng ký', icon: FileText },
-  { to: '/admin/posts', label: 'Bài viết', icon: Newspaper },
+  { to: '/admin/posts', label: 'Tin tức', icon: Newspaper },
   { to: '/admin/users', label: 'Người dùng', icon: Users },
   { to: '/admin/messages', label: 'Tin nhắn', icon: MessageSquare },
 ];

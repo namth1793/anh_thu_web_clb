@@ -22,17 +22,19 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch all clubs → derive real count + totalMembers + featured display
+    // Stats chính xác từ DB
+    api.get('/public/stats').then((r) => {
+      setStats(r.data.stats);
+    }).catch(() => {});
+    // Featured clubs để hiển thị grid
     api.get('/clubs').then((r) => {
       const all = r.data;
-      const totalMembers = all.reduce((sum, c) => sum + (c.member_count || 0), 0);
-      setStats((prev) => ({ ...prev, clubs: all.length, totalMembers }));
       const featured = all.filter((c) => c.is_featured).slice(0, 4);
       setFeaturedClubs(featured.length > 0 ? featured : all.slice(0, 4));
     }).catch(() => {});
+    // Upcoming events cho carousel
     api.get('/events/upcoming').then((r) => {
       setUpcomingEvents(r.data);
-      setStats((prev) => ({ ...prev, events: r.data.length }));
     }).catch(() => {});
   }, []);
 
